@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>هوش</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#3a3a4a;--bg:#fff;--pink:#ffc8dd;--blue:#bde0fe;--mint:#b9fbc0;--yellow:#fdffb6;--lav:#cdb4db}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Vazirmatn,system-ui,sans-serif;font-size:15px;display:flex;flex-direction:column;max-width:760px;margin:0 auto}
+.px{font-family:'Press Start 2P',monospace;font-size:11px}
+header{display:flex;align-items:center;gap:6px;padding:8px;border-bottom:4px solid var(--ink)}
+header h1{margin:0;font-size:16px;flex:1;display:flex;align-items:center;gap:8px}
+.logo{width:28px;height:28px;image-rendering:pixelated}
+.btn{font-family:inherit;font-size:13px;color:var(--ink);cursor:pointer;border:3px solid var(--ink);padding:7px 10px;background:var(--blue);box-shadow:4px 4px 0 var(--ink);position:relative}
+.btn:active{top:3px;left:3px;box-shadow:1px 1px 0 var(--ink)}
+.btn.pink{background:var(--pink)}.btn.mint{background:var(--mint)}.btn.yellow{background:var(--yellow)}.btn.lav{background:var(--lav)}
+.btn:disabled{opacity:.5;cursor:default}
+#modelBtn{max-width:34vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr;font-size:11px}
+#chat{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:92%;padding:10px 12px;border:3px solid var(--ink);word-break:break-word;line-height:1.9;box-shadow:4px 4px 0 var(--ink)}
+.msg.user{align-self:flex-start;background:var(--mint);white-space:pre-wrap}
+.msg.bot{align-self:flex-end;background:var(--yellow)}
+.msg.err{align-self:center;background:var(--pink);white-space:pre-wrap}
+.md p{margin:6px 0}
+.md code{font-family:monospace;font-size:13px;direction:ltr;background:#fff;border:2px solid var(--ink);padding:0 4px}
+.code{margin:8px 0;border:3px solid var(--ink);background:#fff;direction:ltr;text-align:left}
+.chead{display:flex;justify-content:space-between;align-items:center;background:var(--lav);border-bottom:3px solid var(--ink);padding:3px 6px;font-family:monospace;font-size:12px}
+.copybtn{font-family:inherit;font-size:12px;border:2px solid var(--ink);background:var(--mint);cursor:pointer;padding:1px 8px}
+.code pre{margin:0;padding:8px;overflow-x:auto;font-family:monospace;font-size:13px;line-height:1.6;white-space:pre}
+details.tool{margin:8px 0;border:2px dashed var(--ink);background:#fff;padding:4px 8px}
+details.tool summary{cursor:pointer;font-size:13px}
+details.tool pre{direction:ltr;text-align:left;font-family:monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;margin:6px 0;padding:6px;background:#f6f6f6;border:1px solid var(--ink)}
+.empty{margin:auto;text-align:center;line-height:2.4}
+.attach-preview{display:none;flex-wrap:wrap;gap:6px;padding:6px 10px;border-top:2px dashed var(--ink);background:#fafafa}
+.attach-item{position:relative;border:2px solid var(--ink);padding:4px;background:#fff;font-size:12px;max-width:110px}
+.attach-item img{max-width:100px;max-height:70px;display:block}
+.attach-item .rm{position:absolute;top:-8px;left:-8px;background:var(--pink);border:2px solid var(--ink);width:22px;height:22px;border-radius:50%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+form{display:flex;gap:6px;padding:10px;border-top:4px solid var(--ink);align-items:flex-end}
+textarea{flex:1;resize:none;font-family:inherit;font-size:15px;color:var(--ink);border:3px solid var(--ink);padding:8px;background:#fff;max-height:130px;outline:none}
+.overlay{position:fixed;inset:0;background:rgba(58,58,74,.45);display:none;align-items:center;justify-content:center;padding:14px;z-index:10}
+.overlay.on{display:flex}
+.card{background:#fff;border:4px solid var(--ink);box-shadow:6px 6px 0 var(--ink);width:100%;max-width:520px;max-height:85vh;display:flex;flex-direction:column;padding:12px;gap:10px}
+.card h2{margin:0;font-size:15px}
+.card input{font-family:inherit;font-size:14px;border:3px solid var(--ink);padding:8px;outline:none;direction:ltr;width:100%}
+#modelList,#convList{overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+#modelList{direction:ltr}
+.mitem{text-align:left;font-family:monospace;font-size:12px;padding:8px;cursor:pointer;border:3px solid var(--ink);background:#fff;word-break:break-all}
+.mitem.sel{background:var(--pink)}
+.citem{display:flex;gap:6px}
+.citem .ct{flex:1;text-align:right;font-size:13px;padding:8px;cursor:pointer;border:3px solid var(--ink);background:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.citem .ct.sel{background:var(--pink)}
+.citem .cd{border:3px solid var(--ink);background:var(--pink);cursor:pointer;padding:0 10px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.note{font-size:12px;opacity:.8;line-height:1.8}
+#jsErr{display:none;position:fixed;top:0;left:0;right:0;z-index:99;background:#ffc8dd;border-bottom:4px solid #3a3a4a;padding:8px;font-family:monospace;font-size:12px;direction:ltr;text-align:left;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div id="jsErr"></div>
+
+<header>
+  <h1>
+    <svg class="logo" viewBox="0 0 8 8" shape-rendering="crispEdges">
+      <rect width="8" height="8" fill="#ffffff"/>
+      <rect x="1" y="1" width="6" height="5" fill="#cdb4db"/>
+      <rect x="2" y="2" width="1" height="1" fill="#3a3a4a"/>
+      <rect x="5" y="2" width="1" height="1" fill="#3a3a4a"/>
+      <rect x="2" y="4" width="4" height="1" fill="#ffc8dd"/>
+      <rect x="3" y="0" width="2" height="1" fill="#3a3a4a"/>
+      <rect x="1" y="6" width="6" height="1" fill="#3a3a4a"/>
+    </svg>
+    هوش
+  </h1>
+  <button class="btn mint" id="convBtn" type="button">☰</button>
+  <button class="btn lav px" id="modelBtn" type="button">MODEL</button>
+  <button class="btn yellow" id="setBtn" type="button">⚙</button>
+</header>
+
+<div id="chat"></div>
+<div id="attachPreview" class="attach-preview"></div>
+
+<form id="form">
+  <button class="btn mint" id="attachBtn" type="button">📎</button>
+  <input type="file" id="fileInput" accept="image/*,.txt,.md,.py,.js,.json,.csv" multiple hidden>
+  <textarea id="input" rows="1" placeholder="پیامت را بنویس..."></textarea>
+  <button class="btn pink" id="sendBtn" type="submit">ارسال</button>
+</form>
+
+<div class="overlay" id="convOv">
+  <div class="card">
+    <h2>گفتگوها</h2>
+    <div id="convList"></div>
+    <div class="row">
+      <button class="btn mint" id="convNew" type="button">+ گفتگوی تازه</button>
+      <button class="btn" id="convClose" type="button">بستن</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modelOv">
+  <div class="card">
+    <h2>انتخاب مدل (OpenRouter)</h2>
+    <div id="modelList"></div>
+    <div class="row"><button class="btn" id="modelClose" type="button">بستن</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="setOv">
+  <div class="card">
+    <h2>تنظیمات</h2>
+    <div class="note">کلید API اوپن روتر (OpenRouter). این کلید فقط در مرورگر شما ذخیره می‌شود.</div>
+    <input id="keyInput" type="password" placeholder="sk-or-v1-..." autocomplete="off">
+    <div class="row">
+      <button class="btn mint" id="keySave" type="button">ذخیره</button>
+      <button class="btn pink" id="clearChat" type="button">پاک‌کردن این گفتگو</button>
+      <button class="btn" id="setClose" type="button">بستن</button>
+    </div>
+  </div>
+</div>
+
+<script>
+window.onerror = function(msg, src, line) {
+  var b = document.getElementById('jsErr');
+  if (b) {
+    b.style.display = 'block';
+    b.textContent += 'JS error: ' + msg + ' (line ' + line + ')\n';
+  }
+};
+
+const $ = function(id) { return document.getElementById(id); };
+const chat = $('chat');
+const input = $('input');
+const sendBtn = $('sendBtn');
+
+function getKey() { return localStorage.getItem('hoosh_key') || ''; }
+// مدل پیش‌فرض برای OpenRouter
+function getModel() { return localStorage.getItem('hoosh_model') || 'x-ai/grok-beta'; }
+function showModel() { $('modelBtn').textContent = getModel(); }
+showModel();
+
+let convs = [];
+try { convs = JSON.parse(localStorage.getItem('hoosh_convs') || '[]'); } catch(e) { convs = []; }
+if (!Array.isArray(convs)) convs = [];
+let cur = null;
+let busy = false;
+let attachments = [];
+
+function saveConvs() {
+  try { localStorage.setItem('hoosh_convs', JSON.stringify(convs)); } catch(e) {}
+}
+function newConv() {
+  cur = { id: Date.now().toString(36), title: 'گفتگوی جدید', messages: [], ts: Date.now() };
+}
+function commit() {
+  if (convs.indexOf(cur) === -1) convs.unshift(cur);
+  cur.ts = Date.now();
+  convs.sort(function(a, b) { return b.ts - a.ts; });
+  convs = convs.slice(0, 40);
+  saveConvs();
+  try { localStorage.setItem('hoosh_cur', cur.id); } catch(e) {}
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function renderMd(src) {
+  var text = String(src || '');
+  text = esc(text);
+  text = text.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+  text = text.replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>');
+  text = text.replace(/\n/g, '<br>');
+  return text;
+}
+
+function scrollDown() { chat.scrollTop = chat.scrollHeight; }
+function clearEmpty() {
+  var e = $('empty');
+  if (e) e.remove();
+}
+function showEmpty(t) {
+  chat.innerHTML = '<div class="empty" id="empty"><div class="px" style="line-height:2">HELLO!</div><div>' + t + '</div></div>';
+}
+function addMsg(text, cls) {
+  clearEmpty();
+  var d = document.createElement('div');
+  d.className = 'msg ' + cls;
+  d.textContent = text;
+  chat.appendChild(d);
+  scrollDown();
+  return d;
+}
+
+function paintBot(el, segs) {
+  el.innerHTML = '';
+  if (!segs || !segs.length) {
+    el.textContent = '...';
+    return;
+  }
+  for (var i = 0; i < segs.length; i++) {
+    var s = segs[i];
+    if (s.t === 'text') {
+      var div = document.createElement('div');
+      div.className = 'md';
+      div.innerHTML = renderMd(s.v);
+      el.appendChild(div);
+    } else if (s.t === 'tool') {
+      var d = document.createElement('details');
+      d.className = 'tool';
+      if (s.open) d.open = true;
+      var sum = document.createElement('summary');
+      sum.textContent = 'اجرای کد';
+      d.appendChild(sum);
+      var pre1 = document.createElement('pre');
+      pre1.textContent = s.code || '';
+      d.appendChild(pre1);
+      var pre2 = document.createElement('pre');
+      pre2.style.background = '#e8ffe8';
+      pre2.textContent = s.output || '';
+      d.appendChild(pre2);
+      el.appendChild(d);
+    }
+  }
+}
+
+function loadConv(id) {
+  cur = null;
+  for (var i = 0; i < convs.length; i++) {
+    if (convs[i].id === id) { cur = convs[i]; break; }
+  }
+  if (!cur) newConv();
+  chat.innerHTML = '';
+  if (!cur.messages.length) {
+    showEmpty('پیامت را بنویس تا شروع کنیم');
+    return;
+  }
+  for (var j = 0; j < cur.messages.length; j++) {
+    var m = cur.messages[j];
+    if (m.role === 'user') addMsg(m.content, 'user');
+    else {
+      var el = addMsg('', 'bot');
+      paintBot(el, m.segs || [{ t: 'text', v: m.content || '' }]);
+    }
+  }
+  scrollDown();
+}
+
+function renderConvList() {
+  var list = $('convList');
+  list.innerHTML = '';
+  for (var i = 0; i < convs.length; i++) {
+    (function(c) {
+      var row = document.createElement('div');
+      row.className = 'citem';
+      var btn = document.createElement('button');
+      btn.className = 'ct' + (cur && cur.id === c.id ? ' sel' : '');
+      btn.textContent = c.title || 'گفتگو';
+      btn.onclick = function() {
+        loadConv(c.id);
+        $('convOv').classList.remove('on');
+      };
+      var del = document.createElement('button');
+      del.className = 'cd';
+      del.textContent = '×';
+      del.onclick = function() {
+        convs = convs.filter(function(x) { return x.id !== c.id; });
+        saveConvs();
+        if (cur && cur.id === c.id) { newConv(); loadConv(null); }
+        renderConvList();
+      };
+      row.appendChild(btn);
+      row.appendChild(del);
+      list.appendChild(row);
+    })(convs[i]);
+  }
+}
+
+// لیست مدل‌های محبوب OpenRouter (می‌توانید مدل‌های دلخواه خود را اضافه کنید)
+var MODELS = [
+  { id: 'x-ai/grok-beta', name: 'Grok Beta' },
+  { id: 'x-ai/grok-vision-beta', name: 'Grok Vision' },
+  { id: 'openai/gpt-4o', name: 'GPT-4o' },
+  { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini' },
+  { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
+  { id: 'google/gemini-flash-1.5', name: 'Gemini Flash 1.5' },
+  { id: 'meta-llama/llama-3.1-70b-instruct', name: 'Llama 3.1 70B' },
+  { id: 'openrouter/auto', name: 'Auto (انتخاب هوشمند)' }
+];
+
+function renderModels() {
+  var list = $('modelList');
+  list.innerHTML = '';
+  var curM = getModel();
+  for (var i = 0; i < MODELS.length; i++) {
+    (function(m) {
+      var b = document.createElement('button');
+      b.className = 'mitem' + (m.id === curM ? ' sel' : '');
+      b.textContent = m.id + ' — ' + m.name;
+      b.onclick = function() {
+        localStorage.setItem('hoosh_model', m.id);
+        showModel();
+        $('modelOv').classList.remove('on');
+      };
+      list.appendChild(b);
+    })(MODELS[i]);
+  }
+}
+
+function renderAttachments() {
+  var box = $('attachPreview');
+  if (!attachments.length) {
+    box.style.display = 'none';
+    box.innerHTML = '';
+    return;
+  }
+  box.style.display = 'flex';
+  box.innerHTML = '';
+  for (var i = 0; i < attachments.length; i++) {
+    (function(a, idx) {
+      var item = document.createElement('div');
+      item.className = 'attach-item';
+      if (a.type.indexOf('image/') === 0) {
+        var img = document.createElement('img');
+        img.src = a.dataUrl;
+        item.appendChild(img);
+      } else {
+        item.textContent = a.name;
+      }
+      var rm = document.createElement('button');
+      rm.className = 'rm';
+      rm.type = 'button';
+      rm.textContent = '×';
+      rm.onclick = function() {
+        attachments.splice(idx, 1);
+        renderAttachments();
+      };
+      item.appendChild(rm);
+      box.appendChild(item);
+    })(attachments[i], i);
+  }
+}
+
+$('attachBtn').onclick = function() { $('fileInput').click(); };
+$('fileInput').onchange = function(e) {
+  var files = e.target.files;
+  if (!files) return;
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    if (f.size > 1500000) {
+      alert('فایل بزرگ است: ' + f.name);
+      continue;
+    }
+    if (attachments.length >= 3) {
+      alert('حداکثر ۳ فایل');
+      break;
+    }
+    (function(file) {
+      var reader = new FileReader();
+      reader.onload = function() {
+        attachments.push({
+          name: file.name,
+          type: file.type || 'application/octet-stream',
+          dataUrl: reader.result,
+          size: file.size
+        });
+        renderAttachments();
+      };
+      reader.readAsDataURL(file);
+    })(f);
+  }
+  e.target.value = '';
+};
+
+function buildUserContent(text) {
+  if (!attachments.length) return text;
+  var extra = '\n\n---\nپیوست‌ها:\n';
+  for (var i = 0; i < attachments.length; i++) {
+    var a = attachments[i];
+    if (a.type.indexOf('image/') === 0) {
+      extra += '[تصویر: ' + a.name + ']\n' + a.dataUrl + '\n';
+    } else {
+      extra += '[فایل: ' + a.name + ']\n';
+    }
+  }
+  return text + extra;
+}
+
+async function send() {
+  var text = input.value.trim();
+  if ((!text && !attachments.length) || busy) return;
+  if (!getKey()) {
+    addMsg('اول از تنظیمات (⚙) کلید API اوپن روتر را وارد کن', 'err');
+    return;
+  }
+  if (!cur) newConv();
+  busy = true;
+  sendBtn.disabled = true;
+
+  var fullContent = buildUserContent(text || '(فایل پیوست شد)');
+  input.value = '';
+  input.style.height = 'auto';
+  var names = [];
+  for (var i = 0; i < attachments.length; i++) names.push(attachments[i].name);
+  attachments = [];
+  renderAttachments();
+
+  cur.messages.push({ role: 'user', content: fullContent });
+  if (cur.messages.length === 1) cur.title = (text || names[0] || 'گفتگو').slice(0, 40);
+  commit();
+  addMsg(text || ('📎 ' + names.join(', ')), 'user');
+
+  var botEl = addMsg('', 'bot');
+  var segs = [];
+  var currentText = '';
+
+  try {
+    var res = await fetch('/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Api-Key': getKey()
+      },
+      body: JSON.stringify({
+        messages: cur.messages.map(function(m) { return { role: m.role, content: m.content }; }),
+        model: getModel(),
+        stream: true
+      })
+    });
+
+    if (!res.ok) {
+      var errText = await res.text();
+      throw new Error(errText || ('HTTP ' + res.status));
+    }
+
+    var reader = res.body.getReader();
+    var dec = new TextDecoder();
+    var buf = '';
+
+    while (true) {
+      var result = await reader.read();
+      if (result.done) break;
+      buf += dec.decode(result.value, { stream: true });
+      
+      // نرمال‌سازی خطوط
+      buf = buf.replace(/\r\n/g, '\n');
+      var parts = buf.split('\n\n');
+      buf = parts.pop();
+
+      for (var p = 0; p < parts.length; p++) {
+        var part = parts[p];
+        if (part.indexOf('data: ') !== 0) continue;
+        var data;
+        try { data = JSON.parse(part.slice(6)); } catch (e) { continue; }
+        
+        if (data.type === 'delta' && data.text) {
+          currentText += data.text;
+          if (!segs.length || segs[segs.length - 1].t !== 'text') {
+            segs.push({ t: 'text', v: currentText });
+          } else {
+            segs[segs.length - 1].v = currentText;
+          }
+          paintBot(botEl, segs);
+          scrollDown();
+        } else if (data.type === 'error') {
+          throw new Error(data.message || 'خطا در ارتباط با OpenRouter');
+        } else if (data.type === 'done') {
+          break;
+        }
+      }
+    }
+
+    cur.messages.push({ role: 'assistant', content: currentText || '(بدون متن)', segs: segs });
+    commit();
+  } catch (e) {
+    botEl.className = 'msg err';
+    botEl.textContent = 'خطا: ' + (e.message || e);
+  } finally {
+    busy = false;
+    sendBtn.disabled = false;
+  }
+}
+
+$('form').onsubmit = function(e) {
+  e.preventDefault();
+  send();
+};
+input.addEventListener('input', function() {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 130) + 'px';
+});
+input.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+});
+
+$('convBtn').onclick = function() {
+  renderConvList();
+  $('convOv').classList.add('on');
+};
+$('convClose').onclick = function() { $('convOv').classList.remove('on'); };
+$('convNew').onclick = function() {
+  newConv();
+  loadConv(null);
+  $('convOv').classList.remove('on');
+};
+
+$('modelBtn').onclick = function() {
+  renderModels();
+  $('modelOv').classList.add('on');
+};
+$('modelClose').onclick = function() { $('modelOv').classList.remove('on'); };
+
+$('setBtn').onclick = function() {
+  $('keyInput').value = getKey();
+  $('setOv').classList.add('on');
+};
+$('setClose').onclick = function() { $('setOv').classList.remove('on'); };
+$('keySave').onclick = function() {
+  localStorage.setItem('hoosh_key', $('keyInput').value.trim());
+  $('setOv').classList.remove('on');
+};
+$('clearChat').onclick = function() {
+  if (cur) {
+    cur.messages = [];
+    commit();
+    loadConv(cur.id);
+  }
+  $('setOv').classList.remove('on');
+};
+
+(function() {
+  var id = localStorage.getItem('hoosh_cur');
+  var found = false;
+  if (id) {
+    for (var i = 0; i < convs.length; i++) {
+      if (convs[i].id === id) { found = true; break; }
+    }
+  }
+  if (found) loadConv(id);
+  else {
+    newConv();
+    showEmpty('پیامت را بنویس تا شروع کنیم');
+  }
+})();
+</script>
+</body>
+  </html>
