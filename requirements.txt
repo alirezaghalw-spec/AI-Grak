@@ -1,6 +1,0 @@
-fastapi
-uvicorn
-httpx
-pypdf
-matplotlib
-pillow
