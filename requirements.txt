@@ -1,8 +1,0 @@
-fastapi
-uvicorn
-httpx
-pydantic
-pypdf
-beautifulsoup4
-python-multipart
-email-validator
