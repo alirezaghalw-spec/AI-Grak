@@ -1,7 +1,0 @@
-fastapi
-uvicorn[standard]
-httpx
-pydantic[email]
-pypdf
-beautifulsoup4
-python-multipart
